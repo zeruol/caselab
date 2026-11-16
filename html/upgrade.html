@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<base href="../">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CaseLab – Nâng cấp</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&family=Saira+Stencil+One&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<script src="js/data.js" defer></script>
+<script src="js/utils.js" defer></script>
+<script src="js/state.js" defer></script>
+<script src="js/ui.js" defer></script>
+<script src="js/nav.js" defer></script>
+<script src="js/feed.js" defer></script>
+<script src="js/upgrade.js" defer></script>
+<script src="js/main.js" defer></script>
+</head>
+<body data-page="upgrade">
+<header>
+  <a class="logo" href="index.html"><i></i>CaseLab</a>
+  <nav id="nav">
+    <a href="index.html" data-t="cases">Mở hòm</a>
+    <a href="html/upgrade.html" data-t="upgrade">Nâng cấp</a>
+    <a href="html/contract.html" data-t="contract">Hợp đồng</a>
+    <a href="html/inventory.html" data-t="inv">Kho đồ</a>
+  </nav>
+  <div class="wallet">
+    <div class="bal" id="bal">$0.00</div>
+    <button class="btn pri" id="depBtn">+ Nạp tiền</button>
+  </div>
+</header>
+<div class="feed" id="feed" aria-label="Drop trực tiếp (mô phỏng)"></div>
+<main>
+  <section class="sec on" id="s-upgrade">
+    <div class="rush" id="rush" hidden></div>
+    <div class="ug">
+      <div class="ug-side l">
+        <div class="slot" id="upL"></div>
+        <div class="row c" id="upPick"><button class="btn hx dim" id="upRand">Ngẫu nhiên</button><button class="btn hx dim" id="upAll">Chọn tất cả</button></div>
+        <button class="btn hx pur" id="upClr" hidden>✕ Bỏ chọn</button>
+        <div class="sumbox" id="upIn"></div>
+      </div>
+      <div class="ug-mid">
+        <details class="how"><summary>ⓘ Nâng cấp hoạt động thế nào?</summary><p>Chọn tối đa 10 vật phẩm của bạn và 1 vật phẩm muốn nhận. Tỉ lệ thắng = tổng giá trị đưa vào ÷ giá món muốn nhận (tối đa 75%). Kéo thanh bên dưới để dời vùng thắng; kim dừng trong vùng sáng là thắng, ngoài vùng là mất vật phẩm đã đưa vào.</p></details>
+        <div class="gauge" id="gaugeBox"><svg viewBox="0 0 300 300" id="gauge" aria-hidden="true"></svg><div class="g-read"><b id="upChance">0.000 %</b><small id="upLbl">Chưa có tỉ lệ</small></div></div>
+        <div class="chs" id="chsBox"><output id="chsV">Kéo để dời vùng thắng</output><input type="range" id="chs" min="0" max="100" step="0.1" value="0" aria-label="Kéo để dời vùng kim cần rơi vào" disabled></div>
+        <p class="note c">Tỉ lệ tối đa 75% · tối đa 10 vật phẩm mỗi lần</p>
+      </div>
+      <div class="ug-side r">
+        <div class="slot" id="upR"></div>
+        <button class="btn hx pink" id="upBtn" disabled>⇈ Nâng cấp</button>
+        <div class="mults" id="mults"><button data-m="1.05">1.05x</button><button data-m="1.5">1.5x</button><button data-m="2">2x</button><button data-m="5">5x</button><button data-m="10">10x</button><button data-m="20">20x</button></div>
+      </div>
+    </div>
+    <h2 class="up-ttl"><i></i>Nâng cấp skin CS2<i></i></h2>
+    <div class="up2">
+      <div class="pane"><h3>Kho đồ của bạn <span id="upInvN"></span></h3><div class="scroll"><div class="items sel" id="upInv"></div></div></div>
+      <div class="pane"><h3>Vật phẩm mục tiêu <input id="upQ" type="search" placeholder="Tìm skin…" aria-label="Tìm skin"></h3><div class="scroll"><div class="items sel" id="upCat"></div></div></div>
+    </div>
+  </section>
+</main>
+<footer>Trang mô phỏng giải trí, không liên kết với Valve hay bất kỳ trang mở hòm nào. Tiền và vật phẩm đều ảo; dải drop phía trên là dữ liệu giả lập.</footer>
+
+<div class="modal" id="mDep"><div class="box">
+  <h2>Nạp tiền ảo</h2><p class="note">Chọn mức nạp hoặc nhập số tùy ý.</p>
+  <div class="amts" id="amts"><button>5</button><button>10</button><button class="on">25</button><button>50</button><button>100</button><button>500</button></div>
+  <input type="number" id="amtIn" min="0.01" step="0.01" value="25" aria-label="Số tiền">
+  <div class="row actions mt16"><button class="btn" data-close>Hủy</button><button class="btn pri" id="depOk">Nạp</button></div>
+</div></div>
+<div class="modal" id="mWin"><div class="box">
+  <h2 id="winT">Bạn nhận được</h2><p class="note" id="winS"></p>
+  <div class="items" id="winItems"></div>
+  <div class="row actions" id="winBtns"></div>
+</div></div>
+<div class="toast" id="toast"></div>
+</body>
+</html>
