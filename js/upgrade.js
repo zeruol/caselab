@@ -4,8 +4,14 @@ let upSel=[],upT=null,ang=0,upM=null,upIdx=0,upPos=0,rush={id:null,until:0,n:0},
 const upItems=()=>st.inv.filter(x=>upSel.includes(x.id));
 const upSum=()=>upItems().reduce((a,x)=>a+x.p,0);
 const upCh=()=>upT&&upSel.length?Math.min(.75,upSum()/upT.p*.95):0;
-const R=112,CIRC=2*Math.PI*R;
-{const P=(r,a)=>[150+r*Math.sin(a*Math.PI/180),150-r*Math.cos(a*Math.PI/180)],f1=v=>v.toFixed(1);
+// Vòng quay kiểu bát giác. Vùng thắng chạy dọc theo cạnh bát giác (vạch đứt), tính đúng theo góc kim.
+const RO=121,AP=RO*Math.cos(Math.PI/8);
+const GP=(r,a)=>[150+r*Math.sin(a*Math.PI/180),150-r*Math.cos(a*Math.PI/180)];
+// điểm mà tia từ tâm theo góc a (độ, chiều kim đồng hồ từ đỉnh) cắt cạnh bát giác
+const octPt=a=>{const e=Math.round(a/45)*45;return GP(AP/Math.cos((a-e)*Math.PI/180),a)};
+function zonePath(a0,span){if(span<=0)return'';const f=p=>p[0].toFixed(1)+' '+p[1].toFixed(1);let d='M'+f(octPt(a0));
+ for(let v=Math.ceil((a0-22.5)/45)*45+22.5;v<a0+span;v+=45)if(v>a0)d+='L'+f(GP(RO,v));return d+'L'+f(octPt(a0+span))}
+{const P=GP,f1=v=>v.toFixed(1);
  const oct=r=>Array.from({length:8},(_,i)=>P(r,i*45+22.5).map(f1).join(',')).join(' ');
  const edge=(r,i,k)=>{const a=P(r,i*45+22.5),b=P(r,i*45+67.5),m=(1-k)/2;return`<line x1="${f1(a[0]+(b[0]-a[0])*m)}" y1="${f1(a[1]+(b[1]-a[1])*m)}" x2="${f1(b[0]-(b[0]-a[0])*m)}" y2="${f1(b[1]-(b[1]-a[1])*m)}"/>`};
  const diag=[0,2,4,6].map(i=>edge(143,i,.6)).join('');
@@ -14,34 +20,42 @@ const R=112,CIRC=2*Math.PI*R;
  $('gauge').innerHTML=`<defs>
  <radialGradient id="gIn" cx=".5" cy=".42" r=".62"><stop offset="0" stop-color="#5d40d6"/><stop offset=".65" stop-color="#3b2a93"/><stop offset="1" stop-color="#23195a"/></radialGradient>
  <linearGradient id="gArc" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3d9bff"/><stop offset="1" stop-color="#b05cff"/></linearGradient>
- <linearGradient id="gNd" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff2d6f"/><stop offset=".6" stop-color="#ff2d6f" stop-opacity=".8"/><stop offset="1" stop-color="#ff2d6f" stop-opacity=".35"/></linearGradient>
- <filter id="gGlow" x="-1" y="-1" width="3" height="3"><feGaussianBlur stdDeviation="3"/></filter>
- <mask id="gSeg" maskUnits="userSpaceOnUse" x="0" y="0" width="300" height="300"><circle cx="150" cy="150" r="${R}" fill="none" stroke="#fff" stroke-width="14" stroke-dasharray="5.6 2.2"/></mask></defs>
+ <linearGradient id="gArcO" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffb35c"/><stop offset=".55" stop-color="#ff8a3c"/><stop offset="1" stop-color="#b05cff"/></linearGradient>
+ <linearGradient id="gNd" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff2d6f"/><stop offset=".7" stop-color="#ff2d6f"/><stop offset="1" stop-color="#ff2d6f" stop-opacity=".55"/></linearGradient>
+ <radialGradient id="gTrail" gradientUnits="userSpaceOnUse" cx="150" cy="150" r="118"><stop offset=".15" stop-color="#ff2d6f" stop-opacity="0"/><stop offset=".6" stop-color="#ff2d6f" stop-opacity=".25"/><stop offset="1" stop-color="#ff4d85" stop-opacity=".95"/></radialGradient>
+ <filter id="gGlow" x="-1" y="-1" width="3" height="3"><feGaussianBlur stdDeviation="3"/></filter></defs>
  <polygon points="${oct(147)}" fill="#110d25" stroke="#2c2560" stroke-width="2"/>
  <polygon points="${oct(139)}" fill="#17122f" stroke="#3a2f78" stroke-width="1.5"/>
- <g stroke="#9a7dff" stroke-width="7" stroke-linecap="round" opacity=".55" filter="url(#gGlow)">${diag}</g>
- <g stroke="#a58bff" stroke-width="2.6" stroke-linecap="round">${diag}</g>
+ <g class="gd-glow" stroke="#9a7dff" stroke-width="7" stroke-linecap="round" opacity=".55" filter="url(#gGlow)">${diag}</g>
+ <g class="gd" stroke="#a58bff" stroke-width="2.6" stroke-linecap="round">${diag}</g>
  <polygon points="${oct(128)}" fill="url(#gIn)" stroke="#5a44c0" stroke-width="2"/>
  <g stroke="#cbbcff" stroke-opacity=".16" stroke-width="1">${ticks}</g>
  <g fill="#8f80e0">${dots(18)}${dots(282)}</g>
- <circle cx="150" cy="150" r="${R}" fill="none" stroke="#ffffff12" stroke-width="10" mask="url(#gSeg)"/>
- <g mask="url(#gSeg)"><circle id="arc" cx="150" cy="150" r="${R}" fill="none" stroke="url(#gArc)" stroke-width="10" stroke-dasharray="0 ${CIRC}" transform="rotate(-90 150 150)"/></g>`;
+ <path id="arcG" class="zone" d="" fill="none" stroke="url(#gArc)" stroke-width="7" opacity=".5" filter="url(#gGlow)"/>
+ <path id="arc" class="zone" d="" fill="none" stroke="url(#gArc)" stroke-width="4.5" stroke-dasharray="13 5"/>`;
  // Kim nằm ở một SVG riêng chồng lên đồng hồ: khi quay, trình duyệt chỉ xoay lớp này trên GPU
- // thay vì vẽ lại cả đồng hồ (120 vạch, mask, vệt sáng mờ) ở mỗi khung hình.
- const t=150-R,nd=`M147 ${t}H153L154.5 150H145.5Z`; /* kim: từ tâm (150,150) ra đúng bán kính R */
- $('gauge').insertAdjacentHTML('afterend',`<svg id="ndl" class="ndl" viewBox="0 0 300 300" aria-hidden="true">
-  <path d="${nd}" fill="#ff2d6f" opacity=".7" filter="url(#gGlow)"/><path d="${nd}" fill="url(#gNd)"/>
-  <rect x="146" y="${t}" width="8" height="7" rx="2" fill="#ffd3e0"/><circle cx="150" cy="150" r="6" fill="#ff2d6f" stroke="#ffd3e0" stroke-width="1.5"/></svg>`)}
+ // thay vì vẽ lại cả đồng hồ (120 vạch, vệt sáng mờ) ở mỗi khung hình.
+ // kim to, thon dần: đầu ngoài rộng sát mép bát giác, nhọn dần về phía tâm
+ const nd='M144 35L156 35L151.5 110Q150 112.5 148.5 110Z';
+ // vệt sáng kéo đuôi phía sau kim: 14 lát quạt mờ dần
+ const fP=a=>P(116,a).map(f1).join(' ');
+ const trail=Array.from({length:16},(_,k)=>`<path d="M150 150L${fP(-(k+1)*3)}A116 116 0 0 1 ${fP(-k*3)}Z" fill="url(#gTrail)" opacity="${(Math.pow(1-k/16,1.5)*.95).toFixed(3)}"/>`).join('');
+ $('gauge').insertAdjacentHTML('afterend',`<svg id="ndl" class="ndl" viewBox="0 0 300 300" aria-hidden="true"><g class="trail">${trail}</g>
+  <path d="${nd}" fill="#ff2d6f" filter="url(#gGlow)"/><path d="${nd}" fill="url(#gNd)"/>
+  <path d="M150 38L150 96" stroke="#ffd3e0" stroke-width="2" stroke-linecap="round" opacity=".85"/></svg>
+  <div class="g-win" id="gWin" aria-live="polite"></div>`)}
 const HEX='<svg class="hex" viewBox="0 0 100 116" aria-hidden="true"><polygon points="50,3 97,30 97,86 50,113 3,86 3,30"/></svg>';
 const ghost=t=>`<img class="ghost" src="img/17.webp" alt=""><p class="hint">${t}</p>`;
 const big=(it,n,i)=>{const s=S[it.k],[w,k]=shortN(s.n);return`<div class="si" style="--rc:${RAR[s.r][1]}"><div class="glow"></div>${HEX}
  ${n>1?`<span class="more">${i+1} / ${n}</span><div class="cyc"><button data-cy="-1" aria-label="Món trước">▲</button><button data-cy="1" aria-label="Món sau">▼</button></div>`:''}
- <button class="x" data-x aria-label="Bỏ chọn">×</button><img class="big" src="img/${s.i}.webp" alt="${s.n}">
+ <button class="x" data-x aria-label="Bỏ chọn">×</button><img class="big" src="${s.img}" alt="${s.n}">
  <p class="nm">${it.st?'<i>ST™</i>':''}${k?`<span>${k}</span>`:''}<b>${w}</b><small>${WEAR[it.w][1]}</small></p><span class="pz">${money(it.p)}</span></div>`};
 // Phần nhẹ: vòng cung, tỉ lệ, thanh kéo. Gọi riêng khi kéo thanh để không dựng lại ảnh hai bên.
 function drawArc(){const c=upCh();
- $('arc').setAttribute('stroke-dasharray',`${(c*CIRC).toFixed(1)} ${CIRC.toFixed(1)}`);$('arc').setAttribute('transform',`rotate(${(-90+upPos*3.6).toFixed(2)} 150 150)`);
- $('upChance').textContent=(c*100).toFixed(3)+' %';$('upLbl').textContent=!c?'Chưa có tỉ lệ':c>=.5?'Cơ hội cao':c>=.2?'Cơ hội vừa':'Rủi ro cao';
+ const d=zonePath(upPos*3.6,c*360);$('arc').setAttribute('d',d);$('arcG').setAttribute('d',d);
+ $('upGet').textContent=upT?'+'+money(upT.p):'—';
+ $('gaugeBox').classList.toggle('rushy',rush.id!=null&&upSel.includes(rush.id)&&rush.until>Date.now());
+ $('upChance').textContent=(c*100).toFixed(3)+' %';$('upLbl').textContent=!c?'Chưa có tỉ lệ':c>=.5?'Cơ hội cao':c>=.2?'Cơ hội vừa':'Cơ hội nhiều rủi ro';
  $('chs').value=upPos;$('chsBox').style.setProperty('--p',upPos/100);
  $('chsV').textContent=c?`Vùng thắng ${Math.round(upPos*3.6)%360}°–${Math.round((upPos*3.6+c*360)%360)}°`:'Kéo để dời vùng thắng';
  return c}
@@ -76,17 +90,17 @@ $('upR').onclick=e=>{if(!busy&&e.target.closest('[data-x]')){upT=null;upM=null;r
 let arcRaf=0;$('chs').oninput=e=>{upPos=+e.target.value;if(!arcRaf)arcRaf=requestAnimationFrame(()=>{arcRaf=0;drawArc()})};
 // RUSH: thắng xong có 30 giây để nâng tiếp món vừa nhận
 function rushTick(){if(rush.until===Infinity)return;const it=st.inv.find(x=>x.id===rush.id),left=rush.until-Date.now();
- if(!it||left<=0){rush={id:null,until:0,n:0};clearInterval(rushT);rushT=null;$('rush').hidden=true;return}
+ if(!it||left<=0){rush={id:null,until:0,n:0};clearInterval(rushT);rushT=null;$('rush').hidden=true;$('gaugeBox').classList.remove('rushy');return}
  const s=Math.ceil(left/1000),key=it.id+'|'+rush.n;
  // chỉ dựng lại khung RUSH khi đổi món/chuỗi; mỗi giây chỉ cập nhật chữ đồng hồ
  if($('rush').dataset.key!==key){$('rush').dataset.key=key;
-  $('rush').innerHTML=`<b class="rt"></b><img src="img/${it.k}.webp" alt=""><div><small>Nâng cấp ${S[it.k].n}</small><span>${rush.n>1?`<em>🔥RUSH x${rush.n}</em> · nâng tiếp để giữ chuỗi!`:'Để bắt đầu <em>🔥RUSH!</em>'}</span></div>`}
+  $('rush').innerHTML=`<b class="rt"></b><img src="${S[it.k].img}" alt=""><div><small>Nâng cấp ${S[it.k].n}</small><span>${rush.n>1?`<em>🔥RUSH x${rush.n}</em> · nâng tiếp để giữ chuỗi!`:'Để bắt đầu <em>🔥RUSH!</em>'}</span></div>`}
  const rt=$('rush').querySelector('.rt'),txt=`00:${String(s).padStart(2,'0')}`;if(rt.textContent!==txt)rt.textContent=txt;
  $('rush').hidden=false}
 function startRush(it,cont){rush={id:it.id,until:Date.now()+30000,n:cont?rush.n+1:1};clearInterval(rushT);rushT=setInterval(rushTick,250);rushTick()}
 // Các kiểu giảm tốc của kim: lao nhanh rồi phanh gấp / chậm đều / phanh dài, hồi hộp ở cuối
 const SPIN_EASE=['cubic-bezier(.12,.75,.1,1)','cubic-bezier(.2,.6,.25,1)','cubic-bezier(.05,.9,.15,1)','cubic-bezier(.3,.4,.1,1)'];
-$('upBtn').onclick=()=>{const c=upCh(),win=rnd()<c,g=$('gaugeBox'),inRush=rush.id!=null&&upSel.includes(rush.id)&&rush.until>Date.now();if(inRush)rush.until=Infinity;busy=true;$('upBtn').disabled=true;g.classList.remove('win','lose');
+$('upBtn').onclick=()=>{const c=upCh(),win=rnd()<c,g=$('gaugeBox'),inRush=rush.id!=null&&upSel.includes(rush.id)&&rush.until>Date.now();if(inRush)rush.until=Infinity;busy=true;$('upBtn').disabled=true;g.classList.remove('win','lose');g.classList.add('spin');
  const stop=(upPos*3.6+(win?rnd()*c*360:c*360+rnd()*(360-c*360)))%360,fast=matchMedia('(prefers-reduced-motion: reduce)').matches;
  // Tốc độ xoay ngẫu nhiên mỗi lượt: số vòng, thời gian và kiểu giảm tốc (không ảnh hưởng kết quả thắng/thua)
  const spin=fast?{turns:1,dur:1,ease:'ease-out'}:{turns:4+Math.floor(rnd()*6),dur:3.2+rnd()*3.3,ease:SPIN_EASE[Math.floor(rnd()*SPIN_EASE.length)]};
@@ -94,11 +108,13 @@ $('upBtn').onclick=()=>{const c=upCh(),win=rnd()<c,g=$('gaugeBox'),inRush=rush.i
  // Ghi kết quả vào kho NGAY khi bấm: tải lại trang giữa lúc quay không thể "chơi lại" hay giữ lại đồ đã đặt
  const lost=upItems(),it=win?{id:st.uid++,k:upT.k,w:upT.w,st:false,p:upT.p}:null;
  st.inv=st.inv.filter(x=>!upSel.includes(x.id));if(it){st.inv.unshift(it);st.best=Math.max(st.best,it.p)}save();
- setTimeout(()=>{g.classList.add(win?'win':'lose');upSel=[];
+ setTimeout(()=>{g.classList.remove('spin');
+  if(win){const s=S[it.k],[w,k]=shortN(s.n);$('gWin').innerHTML=`<span class="gw-p">+${money(it.p)}</span><img src="${s.img}" alt="${s.n}"><small>${w}</small><b>${k||''}</b><em>${WEAR[it.w][1]}</em>`}
+  g.classList.add(win?'win':'lose');upSel=[];
   setTimeout(()=>{busy=false;g.classList.remove('win','lose');
    if(win){upSel=[it.id];upIdx=0;startRush(it,inRush);showWin([it],'Nâng cấp thành công!','Đổi '+lost.length+' vật phẩm · cơ hội '+(c*100).toFixed(3)+'%')}
    else{if(inRush)rush.until=0;rushTick();showWin([],'Nâng cấp thất bại','Mất '+money(lost.reduce((a,x)=>a+x.p,0))+' · cơ hội '+(c*100).toFixed(3)+'%')}
-   upT=null;upM=null;renderUp()},900)},(spin.dur+.1)*1000)};
+   upT=null;upM=null;renderUp()},win?1700:1100)},(spin.dur+.1)*1000)};
 // Khởi động trang. ?sel=1,2,3 là các món được gửi từ hộp kết quả mở hòm (nút "Nâng cấp tất cả")
 {const q=new URLSearchParams(location.search).get('sel');if(q){upSel=q.split(',').map(Number).filter(id=>st.inv.some(x=>x.id===id)).slice(0,MAXU);history.replaceState(null,'',location.pathname)}}
 renderUp();

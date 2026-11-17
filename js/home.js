@@ -12,7 +12,7 @@ $('bnPrev').onclick=()=>bnGo(bi-1);$('bnNext').onclick=()=>bnGo(bi+1);
 $('bnDots').onclick=e=>{const d=e.target.closest('[data-d]');if(d)bnGo(+d.dataset.d)};
 $('bnTrack').onclick=e=>{const b=e.target.closest('[data-bn]');if(b)BN[+b.dataset.bn].go()};
 bnGo(0);
-const GROUPS=[['Tăng tỉ lệ +1%',[14,15,16,17,18]],['Hòm mới',[9,10,11,12,13]],['Giá rẻ',[0,1,5,2]],['Phổ biến',[4,3,6]],['Cao cấp',[7,8]]];
+const GROUPS=[['Bộ sưu tập mới',[24,25,19,20,21,22,23]],['Tăng tỉ lệ +1%',[14,15,16,17,18]],['Hòm mới',[9,10,11,12,13]],['Giá rẻ',[0,1,5,2]],['Phổ biến',[4,3,6]],['Cao cấp',[7,8]]];
 let gSel='all';
 const caseCard=c=>`<a class="case" style="--c:${c.c}" href="${PAGES.case}?id=${c.i}">${c.boost?'<span class="tag">▲ +1% đồ hiếm</span>':''}${caseArt(c)}<h3>${c.n}</h3><span class="price sk">${money(c.price)}</span></a>`;
 function renderCases(){$('caseGroups').innerHTML=GROUPS.map((g,i)=>gSel==='all'||+gSel===i?`<div class="gh"><h2>${g[0]}</h2><span>${g[1].length} hòm</span></div><div class="grid">${g[1].map(k=>caseCard(CASES[k])).join('')}</div>`:'').join('')}

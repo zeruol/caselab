@@ -1,5 +1,5 @@
 // Thành phần giao diện dùng chung: thẻ vật phẩm, hòm, toast, modal
-const gun=s=>`<img class="gi" src="img/${s.i}.webp" alt="${s.n}" loading="lazy" decoding="async">`;
+const gun=s=>`<img class="gi" src="${s.img}" alt="${s.n}" loading="lazy" decoding="async">`;
 function card(it,o={}){const s=S[it.k],[a,b]=shortN(s.n);return`<div class="it${o.pick?' pick':''}" style="--rc:${RAR[s.r][1]}" ${o.attr||''}>${it.st?'<span class="st">ST™</span>':''}${o.ch!=null?`<span class="ch">${o.ch}</span>`:''}${gun(s)}<div class="nm"><small>${a}</small>${b}</div><span class="pr">${money(it.p)}</span><span class="wr">${it.w!=null?WEAR[it.w][0]:''}</span>${o.sell?`<button class="sell" data-sell="${it.id}">Bán</button>`:''}</div>`}
 function toast(t){const e=$('toast');e.textContent=t;e.classList.add('on');clearTimeout(toast.h);toast.h=setTimeout(()=>e.classList.remove('on'),2200)}
 let caseUid=0;
@@ -22,7 +22,7 @@ const caseArt=c=>{if(c.img)return`<div class="cv cv-img" style="--c:${c.c}"><img
  <rect x="89" y="68" width="22" height="18" rx="3" fill="url(#mt${id})" stroke="#0008"/><rect x="96" y="75" width="8" height="6" rx="1.5" fill="#1a1c22"/>
  <path d="M100 96l13 7.5v15L100 126l-13-7.5v-15z" fill="${d}" stroke="${l}" stroke-width="1.5"/><path d="M100 103l6 3.5v7l-6 3.5-6-3.5v-7z" fill="${l}"/>
  ${[40,60,140,160].map(x=>`<circle cx="${x}" cy="68" r="1.6" fill="url(#mt${id})"/>`).join('')}
- </svg><img class="g2" src="img/${second}.webp" alt=""><img class="g1" src="img/${top}.webp" alt=""></div>`};
+ </svg><img class="g2" src="${S[second].img}" alt=""><img class="g1" src="${S[top].img}" alt=""></div>`};
 
 function showWin(items,title,sub,again=true){
  const tot=items.reduce((a,x)=>a+x.p,0),m=$('mWin'),box=m.querySelector('.box');

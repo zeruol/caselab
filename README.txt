@@ -26,8 +26,8 @@ Cấu trúc:
       contract.js     html/contract.html
       inventory.js    html/inventory.html
     main.js           khởi động phần chung (feed, số dư), luôn nạp cuối
-  img/                42 ảnh skin (.webp)
-    cases/            ảnh hòm mới 1-10.webp (đã tách nền từ thư mục case/, dùng trong js/data.js)
+  img/                42 ảnh skin đầu tiên (.webp); 59 skin bổ sung lấy ảnh trực tiếp từ máy chủ Steam (cần mạng)
+    cases/            ảnh hòm 1-12.webp (đã tách nền từ thư mục case/, dùng trong js/data.js)
   server.js    server Node.js tùy chọn, không cần cài thư viện
 
 Cách 1 - Hosting tĩnh (cPanel, Nginx, Apache, GitHub Pages, Netlify, Vercel...):
