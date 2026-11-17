@@ -25,21 +25,40 @@ const caseArt=c=>{if(c.img)return`<div class="cv cv-img" style="--c:${c.c}"><img
  </svg><img class="g2" src="img/${second}.webp" alt=""><img class="g1" src="img/${top}.webp" alt=""></div>`};
 
 function showWin(items,title,sub,again=true){
- const tot=items.reduce((a,x)=>a+x.p,0);$('winT').textContent=title;$('winS').textContent=sub+' · tổng '+money(tot);
+ const tot=items.reduce((a,x)=>a+x.p,0),m=$('mWin'),box=m.querySelector('.box');
+ // tô màu hộp theo kết quả: thua (không có món nào) / thắng / trúng đồ hiếm (dao, găng, Bí mật)
+ const top=items.reduce((b,x)=>!b||x.p>b.p?x:b,null);
+ box.classList.toggle('lose',!items.length);box.classList.toggle('rare',!!top&&['gold','covert'].includes(S[top.k].r));
+ box.style.setProperty('--rc',top?RAR[S[top.k].r][1]:'#ff4d6d');
+ $('winT').textContent=title;$('winS').textContent=items.length?sub+' · tổng '+money(tot):sub;
  $('winItems').innerHTML=items.map(x=>card(x)).join('');
- $('winBtns').innerHTML=(items.length?`<button class="btn" id="wSell">Bán ${items.length>1?'tất cả ':''}+${money(tot)}</button>`:'')+(items.length&&tab==='case'&&again?`<button class="btn" id="wUp">⇈ Nâng cấp tất cả</button>`:'')+`<button class="btn pri" id="wKeep">${tab==='case'&&again?'Mở lại':'Giữ lại'}</button>`;
- $('mWin').classList.add('on');
- if(items.length)$('wSell').onclick=()=>{sellIds(items.map(x=>x.id));$('mWin').classList.remove('on')};
- if($('wUp'))$('wUp').onclick=()=>{$('mWin').classList.remove('on');sendToUp(items.map(x=>x.id))};
- $('wKeep').onclick=()=>{$('mWin').classList.remove('on');if(tab==='case'&&again)$('openBtn').click()};
+ $('winBtns').innerHTML=(items.length?`<button class="btn" id="wSell">Bán ${items.length>1?'tất cả ':''}+${money(tot)}</button>`:'')+(items.length&&tab==='case'&&again?`<button class="btn" id="wUp">⇈ Nâng cấp tất cả</button>`:'')+`<button class="btn pri" id="wKeep">${tab==='case'&&again?'Mở lại':items.length?'Giữ lại':'Đóng'}</button>`;
+ openModal('mWin');
+ if(items.length)$('wSell').onclick=()=>{closeModal(m);sellIds(items.map(x=>x.id))};
+ if($('wUp'))$('wUp').onclick=()=>{closeModal(m);sendToUp(items.map(x=>x.id))};
+ $('wKeep').onclick=()=>{closeModal(m);if(tab==='case'&&again)$('openBtn').click()};
 }
-function sellIds(ids){let g=0;st.inv=st.inv.filter(x=>{if(ids.includes(x.id)){g+=x.p;return false}return true});st.bal+=g;bal();toast('Đã bán được '+money(g));if(tab==='inv')renderInv()}
+// Vẽ lại phần phụ thuộc kho đồ của trang hiện tại (sau khi bán, hoặc khi tab khác đổi dữ liệu).
+// Mỗi hàm chỉ tồn tại trên trang của nó, nên chỉ gọi đúng hàm của trang đang mở.
+function refresh(){({cases:()=>renderHero(),inv:()=>renderInv(),upgrade:()=>renderUp(),contract:()=>renderCt()})[tab]?.()}
+function sellIds(ids){let g=0;st.inv=st.inv.filter(x=>{if(ids.includes(x.id)){g+=x.p;return false}return true});st.bal+=g;bal();toast('Đã bán được '+money(g));refresh()}
+
+// Hộp thoại: mở/đóng, Esc để đóng, trả focus về chỗ cũ
+let lastFocus=null;
+function openModal(id){lastFocus=document.activeElement;const m=$(id);m.classList.add('on');(m.querySelector('[autofocus],.btn.pri,input')||m).focus?.()}
+function closeModal(m){m.classList.remove('on');if(lastFocus&&document.contains(lastFocus))lastFocus.focus?.()}
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'&&!busy){const m=document.querySelector('.modal.on');if(m)closeModal(m)}
+  // Enter / Space trên thẻ vật phẩm chọn được (tabindex) = bấm chọn
+  if((e.key==='Enter'||e.key===' ')&&e.target.matches?.('.sel .it[tabindex]')){e.preventDefault();e.target.click()}
+});
 
 // deposit
-function openDep(){$('mDep').classList.add('on')}
+function openDep(){openModal('mDep')}
 $('depBtn').onclick=openDep;
 $('amts').onclick=e=>{const b=e.target.closest('button');if(!b)return;[...$('amts').children].forEach(x=>x.classList.toggle('on',x===b));$('amtIn').value=b.textContent};
-$('depOk').onclick=()=>{const v=Math.round(parseFloat($('amtIn').value)*100)/100;if(!(v>0)||v>1e6){toast('Nhập số từ 0.01 đến 1,000,000');return}st.bal+=v;bal();$('mDep').classList.remove('on');toast('Đã nạp '+money(v))};
-document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>b.closest('.modal').classList.remove('on'));
-document.querySelectorAll('.modal').forEach(m=>m.onclick=e=>{if(e.target===m&&!busy)m.classList.remove('on')});
-function confirmBox(t,s,fn){$('confT').textContent=t;$('confS').textContent=s;$('mConf').classList.add('on');$('confOk').onclick=()=>{$('mConf').classList.remove('on');fn()}}
+// form: bấm Nạp hoặc Enter trong ô số tiền đều nạp
+$('depForm').onsubmit=e=>{e.preventDefault();const v=r2(parseFloat($('amtIn').value));if(!(v>0)||v>1e6){toast('Nhập số từ 0.01 đến 1,000,000');return}st.bal+=v;bal();closeModal($('mDep'));toast('Đã nạp '+money(v));refresh()};
+document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>closeModal(b.closest('.modal')));
+document.querySelectorAll('.modal').forEach(m=>m.onclick=e=>{if(e.target===m&&!busy)closeModal(m)});
+function confirmBox(t,s,fn){$('confT').textContent=t;$('confS').textContent=s;openModal('mConf');$('confOk').onclick=()=>{closeModal($('mConf'));fn()}}

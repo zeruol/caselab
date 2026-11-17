@@ -2,7 +2,7 @@
 let sortHi=true;
 function renderInv(){const a=[...st.inv].sort((x,y)=>sortHi?y.p-x.p:y.id-x.id);const tot=st.inv.reduce((s,x)=>s+x.p,0);
  $('invSum').innerHTML=`<div><small>Vật phẩm</small><b>${st.inv.length}</b></div><div><small>Tổng giá trị</small><b>${money(tot)}</b></div><div><small>Đã mở</small><b>${st.opened}</b></div><div><small>Drop tốt nhất</small><b>${money(st.best)}</b></div>`;
- $('invGrid').innerHTML=a.length?a.map(x=>card(x,{sell:1})).join(''):'<div class="empty" style="grid-column:1/-1">Kho đồ trống. Mở vài hòm để có vật phẩm.</div>';
+ $('invGrid').innerHTML=a.length?a.map(x=>card(x,{sell:1})).join(''):'<div class="empty">Kho đồ trống. Mở vài hòm để có vật phẩm.<a class="btn pri sm" href="index.html">Mở hòm</a></div>';
  $('sellAll').disabled=!a.length;$('sortBtn').textContent='Sắp xếp: '+(sortHi?'giá cao':'mới nhất')}
 $('invGrid').onclick=e=>{const b=e.target.closest('[data-sell]');if(b)sellIds([+b.dataset.sell])};
 $('sortBtn').onclick=()=>{sortHi=!sortHi;renderInv()};

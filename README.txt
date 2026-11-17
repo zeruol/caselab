@@ -10,6 +10,8 @@ Cấu trúc:
     (các trang này có <base href="../"> nên mọi đường dẫn css/ js/ img/ tính từ thư mục gốc)
   css/style.css       toàn bộ giao diện
   js/                 mã nguồn
+    layout.js         header, dải drop, hộp thoại, toast, footer của mọi trang
+                      (nạp đồng bộ ngay sau <body>; sửa ở đây là áp dụng cho cả 5 trang)
     Dùng chung, trang nào cũng nạp theo thứ tự:
       data.js         dữ liệu tĩnh: độ hiếm, skin, độ mòn, hòm
       utils.js        hàm tiện ích ($, money, shade...)
